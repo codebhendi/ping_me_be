@@ -1,0 +1,18 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "prettier"],
+  "rules": {
+    "quotes": [2, "single"],
+    "prettier/prettier": "error",
+    "arrow-body-style": ["error", "as-needed"],
+    "import/no-extraneous-dependencies": 0,
+    "no-console": "error",
+    "complexity": ["error", 4],
+    "max-depth": ["error", { "max": 20 }],
+    "max-params": ["error", 3],
+    "max-statements": ["error", 30],
+    "no-unused-labels": "error",
+    "no-unused-vars": "error"
+  },
+  "ignorePatterns": ["src/generated/graphql.ts"]
+}

@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  nandu-service:
+    container_name: nandu-service
+    build: .
+    ports:
+      - '5001:5001'
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - TOKEN_SECRET=${TOKEN_SECRET}
+      - TOKEN_LIFE=${TOKEN_LIFE}
+      - RPZ_KEY_ID=${RPZ_KEY_ID}
+      - RPZ_SECRET_KEY=${RPZ_SECRET_KEY}
+      - MJ_APIKEY_PUBLIC=${MJ_APIKEY_PUBLIC}
+      - MJ_APIKEY_PRIVATE=${MJ_APIKEY_PRIVATE}
+    volumes:
+      - '.:/usr/src/app'
+      - './package.json:/usr/src/package.json'
+
+  postgres-service:
+    image: postgres:12
+    container_name: postgres-service
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - '5433:5432'
