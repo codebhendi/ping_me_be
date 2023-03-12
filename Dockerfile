@@ -2,21 +2,21 @@ FROM node:latest
 
 # set working directory
 RUN mkdir /usr/src/app
-WORKDIR /usr/src
+WORKDIR /usr/src/app
 
 # add `/usr/src/node_modules/.bin` to $PATH
 ENV PATH /usr/src/node_modules/.bin:$PATH
 
-COPY package.json /usr/src/package.json
+COPY package.json /usr/src/app/package.json
 
-COPY yarn.lock /usr/src/yarn.lock
+COPY yarn.lock /usr/src/app/yarn.lock
+
+COPY gulpfile.js /usr/src/app/gulpfile.js
 
 # install and cache app dependencies
 RUN yarn install --ignore-engines
 
 COPY . /usr/src/app
 
-RUN yarn global add nodemon
-
 # start app
-CMD ["sh", "app/run.sh"]
+CMD ["yarn", "run", "start"]

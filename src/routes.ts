@@ -1,4 +1,5 @@
 import { User } from 'entity/User';
+import { UserStatus } from 'entity/UserStatus';
 import express from 'express';
 import { getManager, getConnection, createQueryBuilder } from 'typeorm';
 
@@ -10,7 +11,7 @@ router.get('/', (_, res) => {
 
 router.get('/user-list', async (_, res) => {
   try {
-    const data = await getManager().query('SELECT id from  client');
+    const data = await getManager().query('SELECT id from  "user"');
     return res.status(200).json(data);
   } catch (err) {
     return res.status(500).send(err);
@@ -91,6 +92,27 @@ router.post('/update-user/:id', async (req, res) => {
       .execute();
 
     return res.status(200).json(userData);
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+});
+
+router.post('/update-user-status/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const {
+      raw: [userStatusData],
+    }: { raw: UserStatus[] } = await createQueryBuilder()
+      .insert()
+      .into(UserStatus)
+      .values({ current_status: status, user_id: id })
+      .orUpdate(['current_status'], ['user_id'])
+      .returning(['id'])
+      .execute();
+
+    return res.status(200).json(userStatusData);
   } catch (err) {
     return res.status(500).send(err);
   }

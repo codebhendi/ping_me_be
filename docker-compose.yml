@@ -1,7 +1,7 @@
 version: '3.8'
 services:
-  nandu-service:
-    container_name: nandu-service
+  ping-service:
+    container_name: ping-service
     build: .
     ports:
       - '5001:5001'
