@@ -6,7 +6,7 @@ import {
   PrimaryColumn,
   OneToOne,
 } from 'typeorm';
-import { User } from './User';
+import { UserData } from './UserData';
 
 export enum CurrentStatus {
   CALL = 'call',
@@ -14,6 +14,7 @@ export enum CurrentStatus {
   WHATSAPP = 'whatsapp',
   TEXT = 'text',
   STAR = 'star',
+  UNAVAILABLE = 'unavailable',
 }
 
 @Entity()
@@ -31,7 +32,7 @@ export class UserStatus {
   @UpdateDateColumn()
   udpated_at: Date;
 
-  @OneToOne(() => User, user => user.id)
+  @OneToOne(() => UserData, user => user.id)
   @PrimaryColumn()
   user_id: string;
 }

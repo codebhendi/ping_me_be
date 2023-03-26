@@ -15,7 +15,7 @@ module.exports = {
   migrations: ['lib/migration/*.js'],
   logging: true,
   synchronize: false,
-  migrationsTableName: 'location_migrations',
+  migrationsTableName: 'ping_me_migrations',
   cli: {
     entitiesDir: 'src/entity',
     migrationsDir: 'src/migration',

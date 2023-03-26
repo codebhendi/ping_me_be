@@ -7,17 +7,17 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class UserData {
   @PrimaryGeneratedColumn('identity')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   username: string;
 
-  @Column({ nullable: true })
+  @Column()
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
   @CreateDateColumn()

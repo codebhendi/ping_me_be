@@ -1,7 +1,14 @@
-import { User } from 'entity/User';
+import { UserData } from 'entity/UserData';
 import { UserStatus } from 'entity/UserStatus';
 import express from 'express';
-import { getManager, getConnection, createQueryBuilder } from 'typeorm';
+import { getManager, createQueryBuilder } from 'typeorm';
+import {
+  findUserViaEmail,
+  sendLoginEmail,
+  generateOtp,
+  createSignedToken,
+  verifyUserOtp,
+} from './utils';
 
 const router = express.Router();
 
@@ -11,7 +18,7 @@ router.get('/', (_, res) => {
 
 router.get('/user-list', async (_, res) => {
   try {
-    const data = await getManager().query('SELECT id from  "user"');
+    const data = await getManager().getRepository(UserData).find();
     return res.status(200).json(data);
   } catch (err) {
     return res.status(500).send(err);
@@ -21,9 +28,10 @@ router.get('/user-list', async (_, res) => {
 router.get('/user-details/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const data = (await getManager().getRepository(User).findOne(id)) as User;
+    const data = await getManager().getRepository(UserData).findOne(id);
     return res.status(200).json(data);
   } catch (err) {
+    console.error(err);
     return res.status(500).send(err);
   }
 });
@@ -32,32 +40,9 @@ router.get('/check-is-user/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const data = await getManager()
-      .getRepository(User)
+      .getRepository(UserData)
       .findOne({ id }, { select: ['id'] });
     return res.status(200).json(!!data);
-  } catch (err) {
-    return res.status(500).send(err);
-  }
-});
-
-router.post('/generate-user', async (req, res) => {
-  const { username, email, name } = req.body;
-
-  try {
-    const {
-      raw: [userData],
-    }: { raw: User[] } = await getConnection()
-      .createQueryBuilder()
-      .insert()
-      .into(User)
-      .values({
-        username,
-        email,
-        name,
-      })
-      .execute();
-
-    return res.status(200).json(userData);
   } catch (err) {
     return res.status(500).send(err);
   }
@@ -84,8 +69,8 @@ router.post('/update-user/:id', async (req, res) => {
   try {
     const {
       raw: [userData],
-    }: { raw: User[] } = await createQueryBuilder()
-      .update(User)
+    }: { raw: UserData[] } = await createQueryBuilder()
+      .update(UserData)
       .set(payload)
       .where({ id })
       .returning(['id'])
@@ -115,6 +100,48 @@ router.post('/update-user-status/:id', async (req, res) => {
     return res.status(200).json(userStatusData);
   } catch (err) {
     return res.status(500).send(err);
+  }
+});
+
+router.post('/login', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(500).json({
+      message: 'Invalid email',
+    });
+  }
+
+  try {
+    const user = await findUserViaEmail(email);
+
+    const otp = await generateOtp(user.id);
+
+    if (!otp) return res.status(500).json({ code: 'OTP_EXISTS' });
+
+    sendLoginEmail(email, otp);
+
+    return res.status(200).json({ success: true });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).send(e);
+  }
+});
+
+router.post('/verify-auth-otp', async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(500).json({
+      message: 'Invalid email : OTP',
+    });
+  }
+
+  try {
+    const userId = await verifyUserOtp(email, otp);
+    const token = createSignedToken(userId, email);
+    return res.status(200).json({ token });
+  } catch (e: any) {
+    console.error(e);
+    return res.status(500).json({ message: e.message });
   }
 });
 
