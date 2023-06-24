@@ -145,7 +145,8 @@ export function ensureAuthenticated(req: Request, res: Response, next: NextFunct
 export async function verifyUserOtp(email: string, otp: string) {
   try {
     const data = await createQueryBuilder(UserAuth, 'u')
-      .innerJoinAndSelect('u.user_id', 'user_data', 'user_data.email = :email', { email })
+      .innerJoinAndSelect('u.user_id', 'user_data')
+      .where('user_data.email = :email', { email })
       .getOne();
 
     if (!data) {
